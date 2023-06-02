@@ -1,0 +1,23 @@
+version: '3'
+services:
+  dmarc-collector:
+    image: ./dmarc-collector
+    networks:
+      - backend
+
+  kibana:
+    image: ./kibana
+    networks:
+      - frontend
+      - backend
+
+  elasticsearch:
+    image: ./elasticsearch
+    networks:
+      - backend
+
+networks:
+  frontend:
+    external: true
+  backend:
+    external: false

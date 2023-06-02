@@ -1,0 +1,25 @@
+# Ignore env
+env/
+
+# Ignore pycache
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Ignore egg-info
+*.egg-info/
+
+# Ignore git
+.git
+
+# Ignore build
+build/
+
+# Ignore default log file
+log.txt
+
+# Ignore tests
+tests/
+
+# Ignore dockerfiles
+dockerfiles/

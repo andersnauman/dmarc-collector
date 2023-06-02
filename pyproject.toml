@@ -1,0 +1,31 @@
+[project]
+name = "dmarcanalyzer"
+version = "0.1"
+description = ''
+dependencies = [
+  "dmarcparser@git+https://github.com/andersnauman/dmarc-parser",
+]
+
+[project.optional-dependencies]
+tests = [
+  "pytest",
+]
+
+[project.scripts]
+dmarcanalyzer = "dmarcanalyzer.cli:_run"
+
+[build-system]
+requires = ["setuptools >= 61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = [
+  "--import-mode=importlib",
+]
+
+pythonpath = [
+  "src"
+]
