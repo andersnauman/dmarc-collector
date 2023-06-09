@@ -1,0 +1,38 @@
+DKIM-Signature: v=1; ...; d=mail.receiver.example; ...
+From: dmarc-reporting@mail.receiver.example
+Date: Fri, Feb 15 2002 16:54:30 -0800
+To: dmarc-feedback@example.com
+Subject: Report Domain: example.com
+ Submitter: mail.receiver.example
+ Report-ID: <2002.02.15.1>
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+ boundary="----=_NextPart_000_024E_01CC9B0A.AFE54C00"
+Content-Language: en-us
+
+This is a multipart message in MIME format.
+
+------=_NextPart_000_024E_01CC9B0A.AFE54C00
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+
+This is an aggregate report from mail.receiver.example.
+
+------=_NextPart_000_024E_01CC9B0A.AFE54C00
+Content-Type: application/gzip
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment;
+ filename="mail.receiver.example!example.com!
+ 1013662812!1013749130.gz"
+
+H4sICN4QcWQEAGV4YW1wbGUueG1sAO1Uy27bMBC8F+g/CL5XlGQnSAuG6alf0J4FmlzZbMQH
+SCpN/74rPhzbDZBbTjlpOTv7GA4h+vCs5+YJfFDW3G/6tts0YISVyhzuN79+/vhyt2ke2OdP
+dAKQey4eMW6oB2d9HDVELnnkK9ZQ6w+j4RoYPHPtZmiF1ZRUNHNAczUzLrUyKkTPo/XfL+iJ
+sHJPQ5Q8b/itv7276bY3t8OWkhMjF+AqMHpuDmkYAns4KMOwYvd1N3TDQElCShaMZOfd8Jz7
+kItGeH5FLnV2VuLv6Jb9rMIR6goW9zeXN5CxnOfyUWnmKUlBwYKbVmj9ZsQxD79BREpcBoJj
+xhqgBIPMEJH1XYcEDNKO1/sUn4T1KcTY/inCg128gFE51rdDu2132LdChSLsYnACJSkoYBkB
+T3xeeCySV9EqOBtUxCdU1jxDKinpndBczFbpSdlU0Kp+1fL/oBWuCqiSYKKaFD7bUnIELsGP
+k7f68vLPEqXLdTHlSzyOHsIyx9qu7vLiaLWxwplf5OZDTlUha3TVGZEXQ942Z9du0Z7+w5x3
+N4eS09/uH0F0x9IhBQAA
+
+------=_NextPart_000_024E_01CC9B0A.AFE54C00--

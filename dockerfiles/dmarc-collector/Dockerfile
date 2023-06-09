@@ -1,3 +1,3 @@
 FROM dmarc-collector:latest
 
-CMD ["dmarcanalyzer, "-f", "/data/input", "-r"]
+CMD ["dmarcanalyzer", "-f", "/data/input", "-r"]
