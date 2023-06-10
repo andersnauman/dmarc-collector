@@ -3,17 +3,14 @@ name = "dmarccollector"
 version = "0.1"
 description = ''
 dependencies = [
-  "dmarcparser@git+https://github.com/andersnauman/dmarc-parser",
   "elasticsearch",
   "elasticsearch_dsl",
+  "dmarcparser@git+https://github.com/andersnauman/dmarc-parser",
 ]
 
 [project.optional-dependencies]
 tests = [
   "pytest",
-  "dmarcparser@git+https://github.com/andersnauman/dmarc-parser",
-  "elasticsearch",
-  "elasticsearch_dsl",  
 ]
 
 [project.scripts]
@@ -23,9 +20,6 @@ dmarccollector = "dmarccollector.cli:_run"
 requires = [
   "setuptools >= 61.0.0",
   "wheel",
-  "dmarcparser@git+https://github.com/andersnauman/dmarc-parser",
-  "elasticsearch",
-  "elasticsearch_dsl",  
 ]
 build-backend = "setuptools.build_meta"
 
