@@ -13,10 +13,11 @@ from elasticsearch_dsl import IndexTemplate, Document
 from .mappings import ForensicReport, AggregateReport
 from .mappings import FORENSIC_PATTERN, FORENSIC_ALIAS, AGGREGATE_PATTERN, AGGREGATE_ALIAS
 
+
 class ElasticManager:
     """ Elasticsearch manager to create and use a client connection. """
     # pylint: disable-next=line-too-long,R0913:too-many-arguments
-    def __init__(self, host: str, username: str, password: str, verify_certs: bool = True, logger: logging.Logger = None) -> None:
+    def __init__(self, host: str, username: str, password: str, verify_certs: bool = True, logger: logging.Logger = None) -> None:  # noqa: E501
         if not logger:
             self.logger = logging.getLogger("ElasticManager")
             self.logger.addHandler(logging.NullHandler())
@@ -31,10 +32,10 @@ class ElasticManager:
 
         self._es_client = Elasticsearch(
             host,
-            request_timeout = 3,
-            #ca_certs = "/path/to/http_ca.crt",
-            verify_certs = verify_certs,
-            http_auth = (username, password)
+            request_timeout=3,
+            # ca_certs = "/path/to/http_ca.crt",
+            verify_certs=verify_certs,
+            http_auth=(username, password)
         )
 
         self.logger.info(self._es_client.info())
@@ -57,7 +58,7 @@ class ElasticManager:
 
             # pylint: disable-next=W0212:protected-access
             if not ForensicReport._index.exists(using=self._es_client):
-                #ForensicReport.init(using=self._es_client)
+                # ForensicReport.init(using=self._es_client)
                 self.migrate(
                     alias=FORENSIC_ALIAS,
                     pattern=FORENSIC_PATTERN,
@@ -74,7 +75,7 @@ class ElasticManager:
 
             # pylint: disable-next=W0212:protected-access
             if not AggregateReport._index.exists(using=self._es_client):
-                #ForensicReport.init(using=self._es_client)
+                # ForensicReport.init(using=self._es_client)
                 self.migrate(
                     alias=AGGREGATE_ALIAS,
                     pattern=AGGREGATE_PATTERN,

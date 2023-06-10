@@ -13,16 +13,19 @@ FORENSIC_PATTERN = FORENSIC_ALIAS + "-*"
 AGGREGATE_ALIAS = "aggregate-report"
 AGGREGATE_PATTERN = AGGREGATE_ALIAS + "-*"
 
+
 # pylint: disable-next=too-few-public-methods
 class EmailAddress(InnerDoc):
     """ d """
     address = Keyword()
     name = Keyword()
 
+
 class ReportedMTA(InnerDoc):
     """ d """
     name = Keyword()
     name_type = Keyword()
+
 
 class Received(InnerDoc):
     """ Must be _ since variable names are reserved by python """
@@ -30,6 +33,7 @@ class Received(InnerDoc):
     _by = Keyword()
     _with = Keyword()
     _date = Date()
+
 
 class ForensicSample(InnerDoc):
     """ d """
@@ -42,10 +46,11 @@ class ForensicSample(InnerDoc):
     from_address = Object(EmailAddress)
     message_id = Keyword()
     reply_to_address = Object(EmailAddress)
-    #received = Nested(Received)
+    # received = Nested(Received)
     received = Keyword(multi=True)
     to_addresses = Nested(EmailAddress)
     subject = Text()
+
 
 # pylint: disable-next=too-few-public-methods
 class ForensicReport(Document):
@@ -55,7 +60,7 @@ class ForensicReport(Document):
 
     arrival_date = Date()
     auth_failure = Keyword()
-    authentication_results = Text() # https://www.rfc-editor.org/rfc/rfc7001#page-33
+    authentication_results = Text()  # https://www.rfc-editor.org/rfc/rfc7001#page-33
     dkim_canonicalized_header = Text()
     dkim_canonicalized_body = Text()
     dkim_domain = Keyword()
@@ -93,6 +98,7 @@ class ForensicReport(Document):
         self.last_updated = datetime.now()
         return super().save(**kwargs)
 
+
 class AggregateMetadata(InnerDoc):
     """ Metadata """
     org_name = Keyword()
@@ -100,6 +106,7 @@ class AggregateMetadata(InnerDoc):
     report_id = Keyword()
     date_begin = Date()
     date_end = Date()
+
 
 class AggregatePolicyPublished(InnerDoc):
     """ Published Policy """
@@ -110,18 +117,21 @@ class AggregatePolicyPublished(InnerDoc):
     sp = Keyword()
     pct = Integer()
 
+
 class DKIM(InnerDoc):
     """ d """
     domain = Keyword()
     selector = Keyword()
-    result = Keyword() # none / pass / fail / policy / neutral / temperror / permerror
+    result = Keyword()  # none / pass / fail / policy / neutral / temperror / permerror
     human_result = Keyword()
+
 
 class SPF(InnerDoc):
     """ SPF """
     domain = Keyword()
-    result = Keyword() # none / neutral / pass / fail / softfail / temperror / permerror
-    scope = Keyword() # helo / mfrom
+    result = Keyword()  # none / neutral / pass / fail / softfail / temperror / permerror
+    scope = Keyword()  # helo / mfrom
+
 
 class AggregatePolicyEvaluated(InnerDoc):
     """ Policy Evaluated """
@@ -129,11 +139,13 @@ class AggregatePolicyEvaluated(InnerDoc):
     disposition = Keyword()
     spf = Keyword()
 
+
 class AggregateRow(InnerDoc):
     """ Row """
-    count =  Integer()
-    source_ip =  Ip()
+    count = Integer()
+    source_ip = Ip()
     policy_evaluated = Object(AggregatePolicyEvaluated)
+
 
 class AggregateIdentifiers(InnerDoc):
     """ Identifiers """
@@ -141,16 +153,19 @@ class AggregateIdentifiers(InnerDoc):
     envelope_from = Keyword()
     envelope_to = Keyword()
 
+
 class AggregateAuthResults(InnerDoc):
     """ Auth Results """
     spf = Nested(SPF)
     dkim = Nested(DKIM)
+
 
 class AggregateRecord(InnerDoc):
     """ Record """
     row = Nested(AggregateRow)
     identifiers = Object(AggregateIdentifiers)
     auth_results = Object(AggregateAuthResults)
+
 
 class AggregateReport(Document):
     """ d """

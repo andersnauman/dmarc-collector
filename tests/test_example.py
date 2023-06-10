@@ -8,6 +8,7 @@ import unittest
 from elasticsearch import exceptions
 from dmarccollector.elastic import ElasticManager
 
+
 class MyTestCase(unittest.TestCase):
     """ s """
     def test_failed_connection(self):
@@ -18,6 +19,7 @@ class MyTestCase(unittest.TestCase):
                 username="bad_user",
                 password="bad_password",
             )
+
 
 if __name__ == '__main__':
     unittest.main()

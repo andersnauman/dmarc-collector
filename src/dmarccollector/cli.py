@@ -15,7 +15,8 @@ from dmarcparser import dmarc_from_folder
 
 from .elastic import ElasticManager
 from .elastic.mappings import AggregateReport, ForensicReport, ForensicSample
-from .elastic.mappings import  FORENSIC_ALIAS, AGGREGATE_ALIAS
+from .elastic.mappings import FORENSIC_ALIAS, AGGREGATE_ALIAS
+
 
 def _create_logger(log_level: int = logging.INFO):
     """ Create a logger """
@@ -33,6 +34,7 @@ def _create_logger(log_level: int = logging.INFO):
 
     return _logger
 
+
 def parse_all_files(run_args: dict, logger: logging.Logger) -> list:
     """ s """
     files = dmarc_from_folder(**run_args)
@@ -48,17 +50,18 @@ def parse_all_files(run_args: dict, logger: logging.Logger) -> list:
 
     return all_reports
 
+
 def es_open_connection(args, logger: logging.Logger):
     """ s """
     not_ready = True
     while not_ready:
         try:
             es_manager = ElasticManager(
-                host = args.host,
-                username = args.user,
-                password = args.password,
-                verify_certs = False,
-                logger = logger,
+                host=args.host,
+                username=args.user,
+                password=args.password,
+                verify_certs=False,
+                logger=logger,
             )
         except (exceptions.ConnectionError, exceptions.ConnectionTimeout) as _error:
             logger.debug("Connection error: %s", _error)
@@ -72,6 +75,7 @@ def es_open_connection(args, logger: logging.Logger):
 
     return es_manager
 
+
 def es_upload_aggregate(es_manager: ElasticManager, report: AggregateReport) -> bool:
     """ Upload aggregated report to ElasticSearch """
     if not es_manager.index_exist(AGGREGATE_ALIAS):
@@ -81,13 +85,14 @@ def es_upload_aggregate(es_manager: ElasticManager, report: AggregateReport) -> 
 
     # Try see if the report already exist
     # If it exist already, ignore and continue with next report
-    query = Q("match", metadata__report_id = report.metadata.report_id)
+    query = Q("match", metadata__report_id=report.metadata.report_id)
     search = Search(using=es_manager.get_client(), index=AGGREGATE_ALIAS).query(query)
     results = search.execute()
     if len(results):
         es_manager.logger.debug("Report already exist")
         return True
     return bool(es_manager.save_document(report))
+
 
 def es_upload_forensic(es_manager: ElasticManager, report: ForensicReport) -> bool:
     """ Upload forensic report to ElasticSearch"""
@@ -102,11 +107,11 @@ def es_upload_forensic(es_manager: ElasticManager, report: ForensicReport) -> bo
     #   'arrival_date' + 'original_mail_from__address' + 'all original_rcpt_to.address'
     query = Q(
         "match",
-        arrival_date = report.arrival_date
+        arrival_date=report.arrival_date
     )
     query &= Q(
         "match",
-        original_mail_from__address = report.original_mail_from.address
+        original_mail_from__address=report.original_mail_from.address
     )
     if report.original_rcpt_to:
         for rcpt_to in report.original_rcpt_to:
@@ -127,6 +132,7 @@ def es_upload_forensic(es_manager: ElasticManager, report: ForensicReport) -> bo
         es_manager.logger.debug("Report already exist")
         return True
     return bool(es_manager.save_document(report))
+
 
 def es_upload_reports(es_manager: ElasticManager, reports: list):
     """ Upload all the reports to ElasticSearch """
@@ -155,6 +161,7 @@ def es_upload_reports(es_manager: ElasticManager, reports: list):
                 es_manager=es_manager,
                 report=forensic_report
             )
+
 
 def _run():
     parser = argparse.ArgumentParser(
@@ -190,6 +197,7 @@ def _run():
 
     # Upload all the reports to ElasticSearch
     es_upload_reports(es_manager, all_reports)
+
 
 if __name__ == "__main__":
     _run()
