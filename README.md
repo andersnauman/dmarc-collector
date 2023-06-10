@@ -1,4 +1,4 @@
-[![Docker](https://github.com/andersnauman/dmarc-collector/actions/workflows/docker-image.yml/badge.svg)](https://github.com/andersnauman/dmarc-collector/actions/workflows/docker-image.yml) [![Pylint](https://github.com/andersnauman/dmarc-collector/actions/workflows/pylint.yml/badge.svg)](https://github.com/andersnauman/dmarc-collector/actions/workflows/pylint.yml)
+[![Docker](https://github.com/andersnauman/dmarc-collector/actions/workflows/docker-image.yml/badge.svg)](https://github.com/andersnauman/dmarc-collector/actions/workflows/docker-image.yml) [![Pylint](https://github.com/andersnauman/dmarc-collector/actions/workflows/pylint.yml/badge.svg)](https://github.com/andersnauman/dmarc-collector/actions/workflows/pylint.yml) [![Python App](https://github.com/andersnauman/dmarc-collector/actions/workflows/python-app.yml/badge.svg)](https://github.com/andersnauman/dmarc-collector/actions/workflows/python-app.yml)
 ## DMARC Collector
 ### Create docker-image for DMARC-Collector
 ```
