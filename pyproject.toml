@@ -4,6 +4,8 @@ version = "0.1"
 description = ''
 dependencies = [
   "dmarcparser@git+https://github.com/andersnauman/dmarc-parser",
+  "elasticsearch",
+  "elasticsearch_dsl",
 ]
 
 [project.optional-dependencies]
@@ -15,7 +17,10 @@ tests = [
 dmarccollector = "dmarccollector.cli:_run"
 
 [build-system]
-requires = ["setuptools >= 61.0.0", "wheel"]
+requires = [
+  "setuptools >= 61.0.0",
+  "wheel",
+]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
