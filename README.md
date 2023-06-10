@@ -24,3 +24,9 @@ docker-compose up -d
 # Remove containers
 docker-compose down -v
 ```
+
+### Develope
+```
+pip install pip-tools
+pip-compile --resolver=backtracking pyproject.toml
+```

@@ -33,6 +33,129 @@ def _create_logger(log_level: int = logging.INFO):
 
     return _logger
 
+def parse_all_files(run_args: dict, logger: logging.Logger) -> list:
+    """ s """
+    files = dmarc_from_folder(**run_args)
+
+    if not files:
+        logger.debug("No reports were found. Exiting")
+
+    # {"<hash>": [{"type": ..., "report": ...}]}
+    # [{"type": ..., "report": ...}]
+    all_reports = []
+    for _, reports in files.items():
+        all_reports.extend(reports)
+
+    return all_reports
+
+def es_open_connection(args, logger: logging.Logger):
+    """ s """
+    not_ready = True
+    while not_ready:
+        try:
+            es_manager = ElasticManager(
+                host = args.host,
+                username = args.user,
+                password = args.password,
+                verify_certs = False,
+                logger = logger,
+            )
+        except (exceptions.ConnectionError, exceptions.ConnectionTimeout) as _error:
+            logger.debug("Connection error: %s", _error)
+        except exceptions.AuthenticationException as _error:
+            logger.debug("Authentication error: %s", _error)
+        else:
+            not_ready = False
+            continue
+        finally:
+            time.sleep(1)
+
+    return es_manager
+
+def es_upload_aggregate(es_manager: ElasticManager, report: AggregateReport) -> bool:
+    """ Upload aggregated report to ElasticSearch """
+    if not es_manager.index_exist(AGGREGATE_ALIAS):
+        if not es_manager.create_index(AGGREGATE_ALIAS):
+            es_manager.logger.debug("Could not create index for aggregated report")
+            return False
+
+    # Try see if the report already exist
+    # If it exist already, ignore and continue with next report
+    query = Q("match", metadata__report_id = report.metadata.report_id)
+    search = Search(using=es_manager.get_client(), index=AGGREGATE_ALIAS).query(query)
+    results = search.execute()
+    if len(results):
+        es_manager.logger.debug("Report already exist")
+        return True
+    return bool(es_manager.save_document(report))
+
+def es_upload_forensic(es_manager: ElasticManager, report: ForensicReport) -> bool:
+    """ Upload forensic report to ElasticSearch"""
+    if not es_manager.index_exist(FORENSIC_ALIAS):
+        if not es_manager.create_index(FORENSIC_ALIAS):
+            es_manager.logger.debug("Could not create index for forensic report")
+            return False
+
+    # Try see if the report already exist
+    # If it exist already, ignore and continue with next report
+    # Following fields makes up the 'index' / match:
+    #   'arrival_date' + 'original_mail_from__address' + 'all original_rcpt_to.address'
+    query = Q(
+        "match",
+        arrival_date = report.arrival_date
+    )
+    query &= Q(
+        "match",
+        original_mail_from__address = report.original_mail_from.address
+    )
+    if report.original_rcpt_to:
+        for rcpt_to in report.original_rcpt_to:
+            query &= Q({
+                "nested": {
+                    "path": "original_rcpt_to",
+                    "query": {
+                        "match": {
+                            "original_rcpt_to.address": rcpt_to.address,
+                        },
+                    },
+                },
+            })
+
+    search = Search(using=es_manager.get_client(), index=FORENSIC_ALIAS).query(query)
+    results = search.execute()
+    if len(results):
+        es_manager.logger.debug("Report already exist")
+        return True
+    return bool(es_manager.save_document(report))
+
+def es_upload_reports(es_manager: ElasticManager, reports: list):
+    """ Upload all the reports to ElasticSearch """
+    for report in reports:
+        if "type" in report and report["type"] == "aggregate":
+            if "report" not in report:
+                continue
+
+            aggregate_report = AggregateReport(**report["report"])
+
+            es_upload_aggregate(
+                es_manager=es_manager,
+                report=aggregate_report,
+            )
+
+        elif "type" in report and report["type"] == "forensic":
+            if "report" not in report:
+                continue
+
+            forensic_report = ForensicReport(**report["report"])
+
+            if "sample" in report:
+                forensic_report.sample = ForensicSample(**report["sample"])
+
+            es_upload_forensic(
+                es_manager=es_manager,
+                report=forensic_report
+            )
+
 def _run():
     parser = argparse.ArgumentParser(
         description="""
@@ -56,105 +179,17 @@ def _run():
     run_args["folder"] = "example"
     run_args["recursive"] = True
 
+    # Create a logger
     logger = _create_logger(log_level=run_args["log_level"])
 
-    files = dmarc_from_folder(**run_args)
+    # Parse all the DMARC files
+    all_reports = parse_all_files(run_args, logger)
 
-    if not files:
-        logger.debug("No reports were found. Exiting")
-        sys.exit(0)
+    # Create a connection to ElasticSearch
+    es_manager = es_open_connection(args, logger)
 
-    # {"<hash>": [{"type": ..., "report": ...}]}
-    # [{"type": ..., "report": ...}]
-    all_reports = []
-    for _, reports in files.items():
-        all_reports.extend(reports)
-
-    not_ready = True
-    while not_ready:
-        try:
-            es_manager = ElasticManager(
-                host = args.host,
-                username = args.user,
-                password = args.password,
-                verify_certs = False,
-                logger = logger,
-            )
-        except (exceptions.ConnectionError, exceptions.ConnectionTimeout) as _error:
-            logger.debug("Connection error: %s", _error)
-        except exceptions.AuthenticationException as _error:
-            logger.debug("Authentication error: %s", _error)
-        else:
-            not_ready = False
-            continue
-        finally:
-            time.sleep(1)
-
-    for report in all_reports:
-        if "type" in report and report["type"] == "aggregate":
-            if "report" not in report:
-                continue
-            aggregate_report = AggregateReport(**report["report"])
-
-            if not es_manager.index_exist(AGGREGATE_ALIAS):
-                if not es_manager.create_index(AGGREGATE_ALIAS):
-                    es_manager.logger.debug("Could not create index for aggregated report")
-                    continue
-
-            # Try see if the report already exist
-            # If it exist already, ignore and continue with next report
-            query = Q("match", metadata__report_id = aggregate_report.metadata.report_id)
-            search = Search(using=es_manager.get_client(), index=AGGREGATE_ALIAS).query(query)
-            results = search.execute()
-            if len(results):
-                es_manager.logger.debug("report exist already")
-                continue
-            es_manager.save_document(aggregate_report)
-
-        elif "type" in report and report["type"] == "forensic":
-            if "report" not in report:
-                continue
-            forensic_report = ForensicReport(**report["report"])
-
-            if "sample" in report:
-                forensic_report.sample = ForensicSample(**report["sample"])
-
-            if not es_manager.index_exist(FORENSIC_ALIAS):
-                if not es_manager.create_index(FORENSIC_ALIAS):
-                    es_manager.logger.debug("Could not create index for forensic report")
-                    continue
-
-            # Try see if the report already exist
-            # If it exist already, ignore and continue with next report
-            # Following fields makes up the 'index' / match:
-            #   'arrival_date' + 'original_mail_from__address' + 'all original_rcpt_to.address'
-            query = Q(
-                "match",
-                arrival_date = forensic_report.arrival_date
-            )
-            query &= Q(
-                "match",
-                original_mail_from__address = forensic_report.original_mail_from.address
-            )
-            if forensic_report.original_rcpt_to:
-                for rcpt_to in forensic_report.original_rcpt_to:
-                    query &= Q({
-                        "nested": {
-                            "path": "original_rcpt_to",
-                            "query": {
-                                "match": {
-                                    "original_rcpt_to.address": rcpt_to.address,
-                                },
-                            },
-                        },
-                    })
-
-            search = Search(using=es_manager.get_client(), index=FORENSIC_ALIAS).query(query)
-            results = search.execute()
-            if len(results):
-                es_manager.logger.debug("report exist already")
-                continue
-            es_manager.save_document(forensic_report)
+    # Upload all the reports to ElasticSearch
+    es_upload_reports(es_manager, all_reports)
 
 if __name__ == "__main__":
     _run()

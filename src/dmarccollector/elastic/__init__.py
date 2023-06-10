@@ -19,7 +19,7 @@ from .mappings import FORENSIC_PATTERN, FORENSIC_ALIAS, AGGREGATE_PATTERN, AGGRE
 
 class ElasticManager:
     """ Elasticsearch manager to create and use a client connection. """
-    # pylint: disable-next=line-too-long
+    # pylint: disable-next=line-too-long,R0913:too-many-arguments
     def __init__(self, host: str, username: str, password: str, verify_certs: bool = True, logger: logging.Logger = None) -> None:
         if not logger:
             self.logger = logging.getLogger("ElasticManager")
