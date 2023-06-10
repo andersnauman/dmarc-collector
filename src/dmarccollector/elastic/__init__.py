@@ -1,17 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-""" This is a DMARC analyzer """
+""" Elastic Search library for the DMARC analyzer """
 
-import sys
-import logging
 import json
+import logging
 from datetime import datetime
 
-from typing import Mapping
 from elasticsearch import Elasticsearch
-from elasticsearch.exceptions import RequestError
-
 from elasticsearch_dsl import IndexTemplate, Document
 
 from .mappings import ForensicReport, AggregateReport

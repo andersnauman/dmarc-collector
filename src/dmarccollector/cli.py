@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-""" This is a DMARC analyzer """
+""" Main program for the DMARC analyzer """
 
 import sys
 import time
