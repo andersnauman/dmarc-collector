@@ -1,5 +1,5 @@
 [project]
-name = "dmarcanalyzer"
+name = "dmarccollector"
 version = "0.1"
 description = ''
 dependencies = [
@@ -12,7 +12,7 @@ tests = [
 ]
 
 [project.scripts]
-dmarcanalyzer = "dmarcanalyzer.cli:_run"
+dmarccollector = "dmarccollector.cli:_run"
 
 [build-system]
 requires = ["setuptools >= 61.0.0", "wheel"]

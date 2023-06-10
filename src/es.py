@@ -1,4 +1,4 @@
-    #!/usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """ This is a DMARC analyzer """
@@ -13,9 +13,9 @@ from elasticsearch_dsl import Search, Q
 
 from dmarcparser import dmarc_from_folder
 
-from dmarcanalyzer.elastic import ElasticManager
-from dmarcanalyzer.elastic.mappings import AggregateReport, ForensicReport, ForensicSample
-from dmarcanalyzer.elastic.mappings import  FORENSIC_ALIAS, AGGREGATE_ALIAS
+from dmarccollector.elastic import ElasticManager
+from dmarccollector.elastic.mappings import AggregateReport, ForensicReport, ForensicSample
+from dmarccollector.elastic.mappings import  FORENSIC_ALIAS, AGGREGATE_ALIAS
 
 def _create_logger(log_level: int = logging.INFO):
     """ Create a logger """

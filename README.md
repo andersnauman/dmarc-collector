@@ -1,9 +1,11 @@
-## Create docker-image for DMARC-Collector
+[![Docker](https://github.com/andersnauman/dmarc-collector/actions/workflows/docker-image.yml/badge.svg)](https://github.com/andersnauman/dmarc-collector/actions/workflows/docker-image.yml) [![Pylint](https://github.com/andersnauman/dmarc-collector/actions/workflows/pylint.yml/badge.svg)](https://github.com/andersnauman/dmarc-collector/actions/workflows/pylint.yml)
+## DMARC Collector
+### Create docker-image for DMARC-Collector
 ```
 docker build -t dmarc-collector . 
 ```
 
-## Create environment for Elasticsearch / Kibana / DMARC-Collector
+### Create environment for Elasticsearch / Kibana / DMARC-Collector
 ```
 # Move to folder
 cd dockerfiles
