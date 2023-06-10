@@ -3,7 +3,7 @@
 
 """ This is a DMARC analyzer """
 
-
+import sys
 import logging
 import json
 from datetime import datetime
@@ -14,12 +14,18 @@ from elasticsearch.exceptions import RequestError
 
 from elasticsearch_dsl import IndexTemplate, Document
 
-from .mappings import ForensicReport, AggregateReport, FORENSIC_PATTERN, FORENSIC_ALIAS, AGGREGATE_PATTERN, AGGREGATE_ALIAS
-from .exceptions import _AlreadyExistError
+from .mappings import ForensicReport, AggregateReport
+from .mappings import FORENSIC_PATTERN, FORENSIC_ALIAS, AGGREGATE_PATTERN, AGGREGATE_ALIAS
 
 class ElasticManager:
-    """ d """    
-    def __init__(self, host: str, username: str, password: str, verify_certs: bool = True) -> None:
+    """ Elasticsearch manager to create and use a client connection. """
+    # pylint: disable-next=line-too-long
+    def __init__(self, host: str, username: str, password: str, verify_certs: bool = True, logger: logging.Logger = None) -> None:
+        if not logger:
+            self.logger = logging.getLogger("ElasticManager")
+            self.logger.addHandler(logging.NullHandler())
+        else:
+            self.logger = logger
         if not username or not password:
             raise ValueError("Missing username or password")
         if not verify_certs:
@@ -35,16 +41,19 @@ class ElasticManager:
             http_auth = (username, password)
         )
 
-        logging.info(self._es_client.info())
-        print("ES is ready for connections")
+        self.logger.info(self._es_client.info())
+        self.logger.debug("ES is ready for connections")
 
     def create_index(self, index: str) -> bool:
-        """ d """
+        """
+        Create an index if needed.
+        Returns True if the index exist or is created by this method.
+        """
         if self.index_exist(index):
             return True
 
         if index.startswith("forensic-report"):
-            print("Creating index: ", index)
+            self.logger.debug("Creating index: %s", index)
 
             # pylint: disable-next=W0212:protected-access
             index_template = ForensicReport._index.as_template(FORENSIC_ALIAS, FORENSIC_PATTERN)
@@ -59,8 +68,10 @@ class ElasticManager:
                     move_data=False,
                 )
             return True
-        elif index.startswith("aggregate-report"):
-            print("Creating index: ", index)
+
+        if index.startswith("aggregate-report"):
+            self.logger.debug("Creating index: %s", index)
+
             # pylint: disable-next=W0212:protected-access
             index_template = AggregateReport._index.as_template(AGGREGATE_ALIAS, AGGREGATE_PATTERN)
             index_template.save(using=self._es_client)
@@ -78,17 +89,20 @@ class ElasticManager:
         return False
 
     def index_exist(self, index: str) -> bool:
-        """ d """
+        """ Simple method to check if the index exist """
         if not self._es_client.indices.exists(index=index):
             return False
         return True
 
     def get_mapping(self, index: str) -> json:
-        """ s """
+        """ Get mapping from an index """
         return json.dumps(self._es_client.indices.get_mapping(index=index))
 
     def get_client(self):
-        """ s """
+        """
+        Fail-safe if there is a need to use 'using' outside this class.
+        (Write a method for the task instead!)
+        """
         return self._es_client
 
     def save_index(self, template: IndexTemplate):
@@ -121,6 +135,7 @@ class ElasticManager:
         """ Wrapper to save document with 'using' """
         return document.save(using=self._es_client, refresh=True)
 
+    # pylint: disable-next=line-too-long
     def migrate(self, pattern: str = None, alias: str = None, move_data: bool = True, update_alias: bool = True):
         """
         https://github.com/elastic/elasticsearch-dsl-py/blob/main/examples/alias_migration.py
